@@ -1,0 +1,6 @@
+/.gradle/
+/.idea/
+/build/
+/run-data/
+/run/
+/src/test/
