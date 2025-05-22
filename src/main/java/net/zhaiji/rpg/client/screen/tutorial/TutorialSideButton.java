@@ -15,9 +15,21 @@ public class TutorialSideButton extends Button {
     public int yOffset;
     public int textureWidth;
     public int textureHeight;
+    public int iconXOffset;
+    public int iconYOffset;
+    public int iconWidth;
+    public int iconHeight;
+    public int dotXOffset;
+    public int dotYOffset;
+    public int dotWidth;
+    public int dotHeight;
+    public int scissorMinX;
+    public int scissorMinY;
+    public int scissorMaxX;
+    public int scissorMaxY;
     public TutorialScrollBar scrollBar;
 
-    public TutorialSideButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, OnPress pOnPress, CreateNarration pCreateNarration, TutorialPage page, TutorialScrollBar scrollBar, ResourceLocation texture, int xOffset, int yOffset, int textureWidth, int textureHeight) {
+    public TutorialSideButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, OnPress pOnPress, CreateNarration pCreateNarration, TutorialPage page, TutorialScrollBar scrollBar, ResourceLocation texture, int xOffset, int yOffset, int textureWidth, int textureHeight, int iconXOffset, int iconYOffset, int iconWidth, int iconHeight, int dotXOffset, int dotYOffset, int dotWidth, int dotHeight, int scissorMinX, int scissorMinY, int scissorMaxX, int scissorMaxY) {
         super(pX, pY, pWidth, pHeight, pMessage, pOnPress, pCreateNarration);
         this.originalY = this.getY();
         this.page = page;
@@ -27,6 +39,18 @@ public class TutorialSideButton extends Button {
         this.yOffset = yOffset;
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
+        this.iconXOffset = iconXOffset;
+        this.iconYOffset = iconYOffset;
+        this.iconWidth = iconWidth;
+        this.iconHeight = iconHeight;
+        this.dotXOffset = dotXOffset;
+        this.dotYOffset = dotYOffset;
+        this.dotWidth = dotWidth;
+        this.dotHeight = dotHeight;
+        this.scissorMinX = scissorMinX;
+        this.scissorMinY = scissorMinY;
+        this.scissorMaxX = scissorMaxX;
+        this.scissorMaxY = scissorMaxY;
     }
 
     public static Builder builder() {
@@ -40,24 +64,21 @@ public class TutorialSideButton extends Button {
         return ((this.scrollBar.barY - this.scrollBar.minY) / this.scrollBar.canScrollRange) * this.scrollBar.hiddenRange;
     }
 
-    // 限制点击区域
     @Override
     public boolean clicked(double pMouseX, double pMouseY) {
-        return super.clicked(pMouseX, pMouseY);
-    }
-
-    // render要改isHovered的检测区域
-    @Override
-    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+        return super.clicked(pMouseX, pMouseY)
+                && this.scissorMinX < pMouseX && this.scissorMaxX > pMouseX
+                && this.scissorMinY < pMouseY && this.scissorMaxY > pMouseY;
     }
 
     // render文字还没写
     @Override
     public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        this.updateHovered(pMouseX, pMouseY);
+        this.updateY();
+        pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
-        this.updateY();
         pGuiGraphics.blit(
                 this.texture,
                 this.getX(),
@@ -69,6 +90,52 @@ public class TutorialSideButton extends Button {
                 this.textureWidth,
                 this.textureHeight
         );
+        if (this.page.icon != null) {
+            pGuiGraphics.blit(
+                    this.texture,
+                    this.getX() + this.width - this.iconWidth - 2,
+                    this.getY() + 2,
+                    this.iconXOffset,
+                    this.iconYOffset,
+                    this.iconWidth,
+                    this.iconHeight,
+                    this.textureWidth,
+                    this.textureHeight
+            );
+            // 硬编码了，不要问我为什么（）
+            pGuiGraphics.renderItem(
+                    this.page.icon.getDefaultInstance(),
+                    this.getX() + this.width - 16 - 2 - 1,
+                    this.getY() + 2 + 1
+            );
+        }
+        if (this.page.state == 0 || !this.page.award.isEmpty() && this.page.state == 1) {
+            pGuiGraphics.pose().pushPose();
+            pGuiGraphics.pose().translate(0, 0, 200);
+            pGuiGraphics.blit(
+                    this.texture,
+                    this.getX() + this.width - this.dotWidth - 2 - 1,
+                    this.getY() + 2 + 1,
+                    this.dotXOffset,
+                    this.dotYOffset,
+                    this.dotWidth,
+                    this.dotHeight,
+                    this.textureWidth,
+                    this.textureHeight
+            );
+            pGuiGraphics.pose().popPose();
+        }
+    }
+
+    public void updateHovered(int pMouseX,int pMouseY){
+        if(this.active){
+            this.isHovered = pMouseX >= this.getX()
+                    && pMouseY >= this.getY()
+                    && pMouseX < this.getX() + this.width
+                    && pMouseY < this.getY() + this.height
+                    && this.scissorMinX < pMouseX && this.scissorMaxX > pMouseX
+                    && this.scissorMinY < pMouseY && this.scissorMaxY > pMouseY;
+        }
     }
 
     public void updateY() {
@@ -91,6 +158,19 @@ public class TutorialSideButton extends Button {
         public int yOffset = 0;
         public int textureWidth = 256;
         public int textureHeight = 256;
+        public int iconXOffset;
+        public int iconYOffset;
+        public int iconWidth;
+        public int iconHeight;
+        public int dotXOffset;
+        public int dotYOffset;
+        public int dotWidth;
+        public int dotHeight;
+        public int scissorMinX;
+        public int scissorMinY;
+        public int scissorMaxX;
+        public int scissorMaxY;
+
 
         public TutorialSideButton build() {
             return new TutorialSideButton(
@@ -107,7 +187,19 @@ public class TutorialSideButton extends Button {
                     this.xOffset,
                     this.yOffset,
                     this.textureWidth,
-                    this.textureHeight
+                    this.textureHeight,
+                    this.iconXOffset,
+                    this.iconYOffset,
+                    this.iconWidth,
+                    this.iconHeight,
+                    this.dotXOffset,
+                    this.dotYOffset,
+                    this.dotWidth,
+                    this.dotHeight,
+                    this.scissorMinX,
+                    this.scissorMinY,
+                    this.scissorMaxX,
+                    this.scissorMaxY
             );
         }
 
@@ -183,6 +275,66 @@ public class TutorialSideButton extends Button {
 
         public Builder setTextureHeight(int textureHeight) {
             this.textureHeight = textureHeight;
+            return this;
+        }
+
+        public Builder setIconXOffset(int iconXOffset) {
+            this.iconXOffset = iconXOffset;
+            return this;
+        }
+
+        public Builder setIconYOffset(int iconYOffset) {
+            this.iconYOffset = iconYOffset;
+            return this;
+        }
+
+        public Builder setIconWidth(int iconWidth) {
+            this.iconWidth = iconWidth;
+            return this;
+        }
+
+        public Builder setIconHeight(int iconHeight) {
+            this.iconHeight = iconHeight;
+            return this;
+        }
+
+        public Builder setDotXOffset(int dotXOffset) {
+            this.dotXOffset = dotXOffset;
+            return this;
+        }
+
+        public Builder setDotYOffset(int dotYOffset) {
+            this.dotYOffset = dotYOffset;
+            return this;
+        }
+
+        public Builder setDotWidth(int dotWidth) {
+            this.dotWidth = dotWidth;
+            return this;
+        }
+
+        public Builder setDotHeight(int dotHeight) {
+            this.dotHeight = dotHeight;
+            return this;
+        }
+
+        public Builder setScissorMinX(int scissorMinX) {
+            this.scissorMinX = scissorMinX;
+            return this;
+        }
+
+        public Builder setScissorMinY(int scissorMinY) {
+            this.scissorMinY = scissorMinY;
+            return this;
+        }
+
+        public Builder setScissorMaxX(int scissorMaxX) {
+            this.scissorMaxX = scissorMaxX;
+            return this;
+        }
+
+        public Builder setScissorMaxY(int scissorMaxY) {
+            this.scissorMaxY = scissorMaxY;
             return this;
         }
     }

@@ -107,4 +107,15 @@ public class TutorialEditBox extends EditBox {
 
         pGuiGraphics.fill(RenderType.guiTextHighlight(), pMinX, pMinY, pMaxX, pMaxY, -16776961);
     }
+
+    @Override
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        if (super.mouseClicked(pMouseX, pMouseY, pButton)) {
+            this.setFocused(true);
+            return true;
+        } else {
+            this.setFocused(false);
+            return false;
+        }
+    }
 }

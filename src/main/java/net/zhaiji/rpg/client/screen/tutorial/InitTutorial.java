@@ -56,32 +56,34 @@ public class InitTutorial {
 
     public static TutorialPage TEST_1_1 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_1_1")
                     .setTitle(Component.translatable("test_1_1"))
                     .addCategory(TutorialScreen.Categories.TEST_1)
                     .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_1_2 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_1_2")
                     .setTitle(Component.translatable("test_1_2"))
                     .addCategory(TutorialScreen.Categories.TEST_1)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
+                    .setIcon(Items.IRON_INGOT)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_1_3 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_1_3")
                     .setTitle(Component.translatable("test_1_3"))
                     .addCategory(TutorialScreen.Categories.TEST_1)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
+                    .setIcon(Items.STONE)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
@@ -89,54 +91,56 @@ public class InitTutorial {
 
     public static TutorialPage TEST_2_1 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_2_1")
                     .setTitle(Component.translatable("test_2_1"))
                     .addCategory(TutorialScreen.Categories.TEST_2)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
+                    .setIcon(Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_2_2 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_2_2")
                     .setTitle(Component.translatable("test_2_2"))
                     .addCategory(TutorialScreen.Categories.TEST_2)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_2_3 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_2_3")
                     .setTitle(Component.translatable("test_2_3"))
                     .addCategory(TutorialScreen.Categories.TEST_2)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
+                    .setIcon(Items.IRON_SWORD)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_3_1 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_3_1")
                     .setTitle(Component.translatable("test_3_1"))
                     .addCategory(TutorialScreen.Categories.TEST_3)
                     .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 
     public static TutorialPage TEST_3_2 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_3_2")
                     .setTitle(Component.translatable("test_3_2"))
                     .addCategory(TutorialScreen.Categories.TEST_3)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
@@ -144,12 +148,12 @@ public class InitTutorial {
 
     public static TutorialPage TEST_3_3 = ADD(
             TutorialPage.create()
+                    .setIdentifier("test_3_3")
                     .setTitle(Component.translatable("test_3_3"))
                     .addCategory(TutorialScreen.Categories.TEST_3)
-                    .setIcon(Items.APPLE)
-                    .addAward(Items.STONE, Items.STICK)
                     .addPage(texture, tip_1)
                     .addPage(texture, tip_2)
                     .addPage(texture, tip_3)
+                    .addAward(texture, Items.STONE.getDefaultInstance(), Items.STICK.getDefaultInstance())
     );
 }

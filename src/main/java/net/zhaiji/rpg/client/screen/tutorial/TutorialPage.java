@@ -1,9 +1,9 @@
 package net.zhaiji.rpg.client.screen.tutorial;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -13,27 +13,34 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class TutorialPage {
+    public String identifier;
     public Component title;
+    public Item icon;
     public List<TutorialScreen.Categories> categories = new ArrayList<>();
     public List<TutorialTexture> textures = new ArrayList<>();
     public List<TutorialTip> tips = new ArrayList<>();
+
+    public List<ItemStack> award = new ArrayList<>();
+    public int state = 0;
+
     public int pageNumber = 0;
     public int maxPageNumber = 0;
     public int x;
     public int y;
 
-    public Item icon;
-    public List<Item> award = new ArrayList<>();
-
     public TutorialPage() {
         this.categories.add(TutorialScreen.Categories.ALL);
     }
 
-    public TutorialPage(Component title, List<TutorialScreen.Categories> categories, List<TutorialTexture> textures, List<TutorialTip> tips, int pageNumber, int maxPageNumber, int x, int y) {
+    public TutorialPage(String identifier, Component title, Item icon, List<TutorialScreen.Categories> categories, List<TutorialTexture> textures, List<TutorialTip> tips, List<ItemStack> award, int state, int pageNumber, int maxPageNumber, int x, int y) {
+        this.identifier = identifier;
         this.title = title;
+        this.icon = icon;
         this.categories = categories;
         this.textures = textures;
         this.tips = tips;
+        this.award = award;
+        this.state = state;
         this.pageNumber = pageNumber;
         this.maxPageNumber = maxPageNumber;
         this.x = x;
@@ -42,19 +49,28 @@ public class TutorialPage {
 
     public TutorialPage copy() {
         return new TutorialPage(
-                title,
-                categories,
-                textures,
-                tips,
+                this.identifier,
+                this.title,
+                this.icon,
+                this.categories,
+                this.textures,
+                this.tips,
+                this.award,
+                this.state,
                 0,
-                maxPageNumber,
-                x,
-                y
+                this.maxPageNumber,
+                this.x,
+                this.y
         );
     }
 
     public static TutorialPage create() {
         return new TutorialPage();
+    }
+
+    public TutorialPage setIdentifier(String identifier) {
+        this.identifier = identifier;
+        return this;
     }
 
     public TutorialPage setTitle(Component title) {
@@ -67,8 +83,10 @@ public class TutorialPage {
         return this;
     }
 
-    public TutorialPage addAward(Item... item) {
+    public TutorialPage addAward(TutorialTexture tutorialTexture, ItemStack... item) {
         this.award.addAll(List.of(item));
+        this.textures.add(tutorialTexture);
+        this.maxPageNumber++;
         return this;
     }
 
@@ -99,15 +117,19 @@ public class TutorialPage {
         tips.forEach(tip -> tip.setX(x).setY(y + 100));
     }
 
+    public void updateState(int state) {
+        if (state == 2 && this.state != state) {
+            this.maxPageNumber--;
+        }
+        if (this.state < state) {
+            this.state = state;
+        }
+    }
+
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.getTexture(this.pageNumber).render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        this.getTip(this.pageNumber).render(pGuiGraphics, Minecraft.getInstance().font, pMouseX, pMouseY, pPartialTick);
-        pGuiGraphics.drawString(
-                Minecraft.getInstance().font,
-                this.pageNumber + "/" + (this.maxPageNumber - 1),
-                this.x,
-                this.y,
-                -1
-        );
+        if (this.award.isEmpty() || this.pageNumber < this.maxPageNumber - 1) {
+            this.getTip(this.pageNumber).render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+        }
     }
 }

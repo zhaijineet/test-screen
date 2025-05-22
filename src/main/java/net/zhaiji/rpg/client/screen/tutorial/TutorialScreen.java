@@ -1,17 +1,24 @@
 package net.zhaiji.rpg.client.screen.tutorial;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.zhaiji.rpg.Rpg;
+import net.zhaiji.rpg.handle.PlayerMixinInterface;
+import net.zhaiji.rpg.network.RpgPacket;
+import net.zhaiji.rpg.network.packet.AwardServerPacket;
+import net.zhaiji.rpg.network.packet.PageServerPacket;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TutorialScreen extends Screen {
     public int leftPos;
@@ -23,7 +30,7 @@ public class TutorialScreen extends Screen {
     public int textureWidth = 512;
     public int textureHeight = 512;
     public Categories category = Categories.ALL;
-    public List<TutorialPage> allPages = InitTutorial.PAGES;
+    public List<TutorialPage> allPages = new ArrayList<>();
     public List<TutorialPage> categoryPages;
     public List<TutorialPage> pages;
     public TutorialPage selectPage;
@@ -35,7 +42,7 @@ public class TutorialScreen extends Screen {
     public float searchBoxScale = 1.3f;
     public String oldSearch = "";
 
-    public List<TutorialTabButton> Tabs = new ArrayList<>();
+    public List<TutorialTabButton> tabs = new ArrayList<>();
     public int tabX = 135;
     public int tabY = 12;
     public int tabWidth = 25;
@@ -48,13 +55,21 @@ public class TutorialScreen extends Screen {
     public int tabActiveHeight = 36;
     public int tabActiveXOffset = 259;
     public int tabActiveYOffset = 17;
-    public int tabDistance = 5;
+    public int tabSpacing = 5;
 
     public TutorialPageButton leftButton;
     public TutorialPageButton rightButton;
     public int buttonX = 91;
-    public int buttonY = 208+14;
-    public int buttonDistance = 135;
+    public int buttonY = 222;
+    public int buttonSpacing = 135;
+
+    public TutorialButton claimButton;
+    public int claimButtonX = 129;
+    public int claimButtonY = 222;
+    public int claimButtonWidth = 73;
+    public int claimButtonHeight = 16;
+    public int claimButtonXOffset = 259;
+    public int claimButtonYOffset = 145;
 
     public TutorialScrollBar scrollBar = TutorialScrollBar.create();
     public boolean scrolling = false;
@@ -72,19 +87,37 @@ public class TutorialScreen extends Screen {
     public int scrollRailXOffset = 334;
     public int scrollRailYOffset = 18;
 
+    public int slotIconWidth = 18;
+    public int slotIconHeight = 18;
+    public int slotIconXOffset = 260;
+    public int slotIconYOffset = 56;
+    public int slotIconSpacing = 7;
+
     public int sideButtonWidth = 63;
     public int sideButtonHeight = 22;
     public int sideButtonXOffset = 259;
     public int sideButtonYOffset = 76;
+    public int sideButtonDotWidth = 4;
+    public int sideButtonDotHeight = 4;
+    public int sideButtonDotXOffset = 281;
+    public int sideButtonDotYOffset = 56;
     public int sideButtonX = 7;
     public int sideButtonY = 67;
-    public int sideButtonDistance = 2;
+    public int sideButtonSpacing = 2;
     public int sideButtonVisibleCount = 7;
 
     public int sideButtonTotalHeight;
     public int sideButtonVisibleHeight;
 
     public List<TutorialSideButton> sideButton = new ArrayList<>();
+
+    public int pageDotWidth = 3;
+    public int pageDotHeight = 3;
+    public int pageEmptyDotXOffset = 281;
+    public int pageEmptyDotYOffset = 71;
+    public int pageSolidDotXOffset = 287;
+    public int pageSolidDotYOffset = 71;
+    public int pageDotSpacing = 3;
 
     public TutorialScreen(Component pTitle) {
         super(pTitle);
@@ -121,6 +154,7 @@ public class TutorialScreen extends Screen {
                 .setX(this.leftPos)
                 .setY(this.topPos);
 
+        this.initPages();
         this.loadCategoryPages();
 
         this.selectPage = null;
@@ -158,17 +192,40 @@ public class TutorialScreen extends Screen {
 
         this.rightButton = this.addRenderableWidget(
                 new TutorialPageButton(
-                        this.leftPos + this.buttonX + this.buttonDistance,
+                        this.leftPos + this.buttonX + this.buttonSpacing,
                         this.topPos + this.buttonY,
                         true,
                         pButton -> {
                             this.selectPage.pageNumber++;
                             this.updateButton();
+                            if (!this.rightButton.visible) {
+                                this.updatePageState(1);
+                            }
                         },
                         true
                 )
         );
-        // 还差退出按钮
+
+        this.claimButton = this.addRenderableWidget(
+                TutorialButton.builder()
+                        .setTexture(this.TEXTURE)
+                        .setX(this.leftPos + this.claimButtonX)
+                        .setY(this.topPos + this.claimButtonY)
+                        .setWidth(this.claimButtonWidth)
+                        .setHeight(this.claimButtonHeight)
+                        .setXOffset(this.claimButtonXOffset)
+                        .setYOffset(this.claimButtonYOffset)
+                        .setMessage(Component.translatable("claim_button"))
+                        .setOnPress(pButton -> {
+                            // 发包
+                            this.updatePageState(2);
+                            RpgPacket.sendToServer(new AwardServerPacket(this.selectPage.identifier));
+                            this.updateButton();
+                        })
+                        .setTextureWidth(this.textureWidth)
+                        .setTextureHeight(this.textureHeight)
+                        .build()
+        );
 
         this.scrollBar
                 .setTexture(this.TEXTURE)
@@ -179,7 +236,6 @@ public class TutorialScreen extends Screen {
                 .setBarWidth(this.scrollBarWidth)
                 .setBarHeight(this.scrollBarHeight)
                 .setMinY(this.topPos + this.scrollBarY)
-//                .setMaxY(this.topPos + this.scrollBarY + this.scrollRailHeight)
                 .setBarXOffset(this.scrollBarXOffset)
                 .setBarYOffset(this.scrollBarYOffset)
                 .setRailX(this.leftPos + this.scrollRailX)
@@ -201,8 +257,9 @@ public class TutorialScreen extends Screen {
     }
 
     public void initTabButton() {
+        this.tabs.clear();
         for (Categories category : Categories.values()) {
-            this.Tabs.add(
+            this.tabs.add(
                     this.addRenderableWidget(
                             TutorialTabButton.builder()
                                     .setTexture(this.TEXTURE)
@@ -210,13 +267,13 @@ public class TutorialScreen extends Screen {
                                     .setTextureHeight(this.textureHeight)
                                     .setCategory(category)
                                     .setIcon(category.icon)
-                                    .setX(this.leftPos + this.tabX + this.Tabs.size() * (this.tabWidth + this.tabDistance) - this.tabDistance)
+                                    .setX(this.leftPos + this.tabX + this.tabs.size() * (this.tabWidth + this.tabSpacing) - this.tabSpacing)
                                     .setY(this.topPos + this.tabY)
                                     .setWidth(this.tabWidth)
                                     .setHeight(this.tabHeight)
                                     .setXOffset(this.tabXOffset)
                                     .setYOffset(this.tabYOffset)
-                                    .setActiveX(this.leftPos + this.tabActiveX + this.Tabs.size() * (this.tabWidth + this.tabDistance) - this.tabDistance)
+                                    .setActiveX(this.leftPos + this.tabActiveX + this.tabs.size() * (this.tabWidth + this.tabSpacing) - this.tabSpacing)
                                     .setActiveY(this.topPos + this.tabActiveY)
                                     .setActiveWidth(this.tabActiveWidth)
                                     .setActiveHeight(this.tabActiveHeight)
@@ -225,14 +282,32 @@ public class TutorialScreen extends Screen {
                                     .setMessage(category.title)
                                     .setOnPress(pButton -> {
                                         if (pButton instanceof TutorialTabButton button) {
-                                            if (!this.category.equals(button.category)) {
-                                                this.category = button.category;
-                                            } else {
+                                            if (this.category.equals(button.category)) {
                                                 this.category = Categories.ALL;
+                                            } else {
+                                                this.category = button.category;
                                             }
+                                            this.tabs.forEach(tab -> {
+                                                if (tab == button) {
+                                                    tab.setFocused(!tab.isFocused());
+                                                } else {
+                                                    tab.setFocused(false);
+                                                }
+                                            });
                                             this.loadCategoryPages();
-                                            if (!this.searchPages()) {
-                                                this.updateSideButton();
+                                            this.pages.clear();
+                                            for (TutorialPage page : this.categoryPages) {
+                                                if (page.title.getString().contains(this.searchBox.getValue())) {
+                                                    this.pages.add(page);
+                                                }
+                                            }
+                                            this.updateSideButton();
+                                            if (this.selectPage != null) {
+                                                this.sideButton.forEach(sideButton -> {
+                                                    if (sideButton.page.identifier.equals(this.selectPage.identifier)) {
+                                                        sideButton.setFocused(true);
+                                                    }
+                                                });
                                             }
                                         }
                                     })
@@ -242,13 +317,16 @@ public class TutorialScreen extends Screen {
         }
     }
 
-    public void initSideButtonTotalAndVisibleHeight() {
-        this.sideButtonTotalHeight = (this.sideButtonHeight + this.sideButtonDistance) * this.sideButton.size() - this.sideButtonDistance;
-        this.sideButtonVisibleHeight = (this.sideButtonHeight + this.sideButtonDistance) * this.sideButtonVisibleCount - this.sideButtonDistance;
+    public void initSideButtonVisibleHeight() {
+        this.sideButtonVisibleHeight = (this.sideButtonHeight + this.sideButtonSpacing) * this.sideButtonVisibleCount - this.sideButtonSpacing;
+    }
+
+    public void initSideButtonTotalHeight() {
+        this.sideButtonTotalHeight = (this.sideButtonHeight + this.sideButtonSpacing) * this.sideButton.size() - this.sideButtonSpacing;
     }
 
     public void updateScrollBar() {
-        this.initSideButtonTotalAndVisibleHeight();
+        this.initSideButtonTotalHeight();
         if (this.sideButtonTotalHeight > this.sideButtonVisibleHeight) {
             int newBarHeight = this.scrollRailHeight * this.sideButtonVisibleHeight / this.sideButtonTotalHeight;
             this.scrollBar.setBarHeight(newBarHeight);
@@ -271,6 +349,7 @@ public class TutorialScreen extends Screen {
 
     public void initSideButton() {
         this.sideButton.clear();
+        this.initSideButtonVisibleHeight();
         for (TutorialPage page : this.pages) {
             this.addSideButton(
                     TutorialSideButton.builder()
@@ -283,15 +362,29 @@ public class TutorialScreen extends Screen {
                             .setTextureHeight(this.textureHeight)
                             .setXOffset(this.sideButtonXOffset)
                             .setYOffset(this.sideButtonYOffset)
+                            .setIconWidth(this.slotIconWidth)
+                            .setIconHeight(this.slotIconHeight)
+                            .setIconXOffset(this.slotIconXOffset)
+                            .setIconYOffset(this.slotIconYOffset)
+                            .setDotWidth(this.sideButtonDotWidth)
+                            .setDotHeight(this.sideButtonDotHeight)
+                            .setDotXOffset(this.sideButtonDotXOffset)
+                            .setDotYOffset(this.sideButtonDotYOffset)
+                            .setScissorMinX(this.leftPos + this.sideButtonX)
+                            .setScissorMinY(this.topPos + this.sideButtonY)
+                            .setScissorMaxX(this.leftPos + this.sideButtonX + this.sideButtonWidth)
+                            .setScissorMaxY(this.topPos + this.sideButtonY + this.sideButtonVisibleHeight)
                             .setPage(page)
                             .setScrollBar(this.scrollBar)
                             .setMessage(page.title)
                             .setOnPress(pButton -> {
                                 if (pButton instanceof TutorialSideButton button) {
-                                    if (this.selectPage != null && button.page.title.equals(this.selectPage.title)) {
+                                    this.sideButton.forEach(sideButton -> sideButton.setFocused(false));
+                                    if (this.selectPage != null && button.page.identifier.equals(this.selectPage.identifier)) {
                                         this.selectPage = null;
                                     } else {
                                         this.selectPage = button.page.copy();
+                                        button.setFocused(true);
                                     }
                                     this.updateButton();
                                 }
@@ -302,7 +395,7 @@ public class TutorialScreen extends Screen {
     }
 
     public void addSideButton(TutorialSideButton button){
-        button.setY(this.topPos + this.sideButtonY + this.sideButton.size() * (sideButtonHeight + sideButtonDistance));
+        button.setY(this.topPos + this.sideButtonY + this.sideButton.size() * (sideButtonHeight + sideButtonSpacing));
         this.sideButton.add(button);
         button.originalY = button.getY();
         this.addWidget(button);
@@ -317,22 +410,53 @@ public class TutorialScreen extends Screen {
         if (this.selectPage != null) {
             this.leftButton.visible = this.selectPage.pageNumber > 0;
             this.rightButton.visible = this.selectPage.pageNumber < this.selectPage.maxPageNumber - 1;
+            this.claimButton.visible = this.selectPage.pageNumber >= this.selectPage.maxPageNumber - 1 && this.selectPage.state != 2 && !this.selectPage.award.isEmpty();
         } else {
             this.leftButton.visible = false;
             this.rightButton.visible = false;
+            this.claimButton.visible = false;
+        }
+    }
+
+    public void initPages() {
+        PlayerMixinInterface playerMixinInterface = ((PlayerMixinInterface) Minecraft.getInstance().player);
+        this.allPages.clear();
+        for (TutorialPage page : InitTutorial.PAGES) {
+            this.allPages.add(page.copy());
+        }
+        System.out.println(playerMixinInterface.getTutorialPages());
+        this.allPages.forEach(page -> {
+            System.out.println(playerMixinInterface.getTutorialPages().getInt(page.identifier));
+            page.updateState(playerMixinInterface.getTutorialPages().getInt(page.identifier));
+        });
+    }
+
+    public void updatePageState(int state) {
+        CompoundTag compoundTag = new CompoundTag();
+        this.allPages.forEach(page -> {
+            if (this.selectPage != null && page.identifier.equals(this.selectPage.identifier)) {
+                page.updateState(state);
+                this.selectPage.updateState(state);
+            }
+            compoundTag.putInt(page.identifier, page.state);
+        });
+        PlayerMixinInterface playerMixinInterface = ((PlayerMixinInterface) Minecraft.getInstance().player);
+        if (!compoundTag.equals(playerMixinInterface.getTutorialPages())) {
+            playerMixinInterface.setTutorialPages(compoundTag);
+            RpgPacket.sendToServer(new PageServerPacket(playerMixinInterface.getTutorialPages()));
         }
     }
 
     // page的位置没有调整
     public void loadCategoryPages() {
-        this.categoryPages = this.allPages.stream().filter(page -> page.categories.contains(this.category)).toList();
+        this.categoryPages = this.allPages.stream().filter(page -> page.categories.contains(this.category)).collect(Collectors.toList());
         for (TutorialPage page : this.categoryPages) {
             page.init(this.leftPos + 92, this.topPos + 40);
         }
         this.pages = new ArrayList<>(this.categoryPages);
     }
 
-    public boolean searchPages() {
+    public void searchPages() {
         String searchString = this.searchBox.getValue();
         if (!searchString.equals(this.oldSearch)) {
             this.pages.clear();
@@ -343,9 +467,55 @@ public class TutorialScreen extends Screen {
             }
             this.oldSearch = searchString;
             this.updateSideButton();
-            return true;
         }
-        return false;
+    }
+
+    public void awardRender(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        if (this.selectPage.state != 2 && this.selectPage.pageNumber >= this.selectPage.maxPageNumber - 1) {
+            int x = this.leftPos + this.claimButtonX + this.claimButtonWidth / 2;
+            int y = this.topPos + this.claimButtonY - 5 - this.pageDotHeight - 3 - this.slotIconHeight;
+            int totalWidth = (this.slotIconWidth + this.slotIconSpacing) * this.selectPage.award.size() - this.slotIconSpacing;
+            int startX = x - totalWidth / 2;
+            for (int i = 0; i < this.selectPage.award.size(); i++) {
+                int renderX = startX + i * (this.slotIconWidth + this.slotIconSpacing);
+                pGuiGraphics.blit(
+                        this.TEXTURE,
+                        renderX,
+                        y,
+                        this.slotIconXOffset,
+                        this.slotIconYOffset,
+                        this.slotIconWidth,
+                        this.slotIconHeight,
+                        this.textureWidth,
+                        this.textureHeight
+                );
+                pGuiGraphics.renderItem(
+                        this.selectPage.award.get(i),
+                        renderX + 1,
+                        y + 1
+                );
+            }
+        }
+    }
+
+    public void pageNumberRender(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        int x = this.leftPos + this.claimButtonX + this.claimButtonWidth / 2;
+        int y = this.topPos + this.claimButtonY - 5 - this.pageDotHeight;
+        int totalWidth = (this.pageDotWidth + this.pageDotSpacing) * this.selectPage.maxPageNumber - this.pageDotSpacing;
+        int startX = x - totalWidth / 2;
+        for (int i = 0; i < this.selectPage.maxPageNumber; i++) {
+            pGuiGraphics.blit(
+                    this.TEXTURE,
+                    startX + i * (this.pageDotWidth + this.pageDotSpacing),
+                    y,
+                    i == this.selectPage.pageNumber ? this.pageSolidDotXOffset : this.pageEmptyDotXOffset,
+                    i == this.selectPage.pageNumber ? this.pageSolidDotYOffset : this.pageEmptyDotYOffset,
+                    this.pageDotWidth,
+                    this.pageDotHeight,
+                    this.textureWidth,
+                    this.textureHeight
+            );
+        }
     }
 
     @Override
@@ -356,6 +526,8 @@ public class TutorialScreen extends Screen {
 
         if (this.selectPage != null) {
             this.selectPage.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+            this.awardRender(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+            this.pageNumberRender(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         }
 
         this.searchPages();
@@ -390,7 +562,7 @@ public class TutorialScreen extends Screen {
         }
         for(GuiEventListener guieventlistener : this.children()) {
             if (guieventlistener.mouseClicked(pMouseX, pMouseY, pButton)) {
-                this.setFocused(guieventlistener);
+                this.focused = guieventlistener;
                 if (pButton == 0) {
                     this.setDragging(true);
                 }

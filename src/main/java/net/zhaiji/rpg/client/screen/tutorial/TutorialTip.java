@@ -1,5 +1,6 @@
 package net.zhaiji.rpg.client.screen.tutorial;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -65,10 +66,10 @@ public class TutorialTip {
         return line;
     }
 
-    public void render(GuiGraphics pGuiGraphics, Font pFont, int pMouseX, int pMouseY, float pPartialTick) {
+    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         int line = 0;
         for (Component component : this.components) {
-            line += this.drawWordWrap(pGuiGraphics, pFont, component, this.x, this.y + line * 9, maxLineWidth, color);
+            line += this.drawWordWrap(pGuiGraphics, Minecraft.getInstance().font, component, this.x, this.y + line * 9, maxLineWidth, color);
         }
     }
 }
