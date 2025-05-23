@@ -1,15 +1,20 @@
 package net.zhaiji.rpg.client.screen.tutorial;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 public class TutorialSideButton extends Button {
     public int originalY;
     public TutorialPage page;
+    public TutorialScrollBar scrollBar;
     public ResourceLocation texture;
     public int xOffset;
     public int yOffset;
@@ -27,9 +32,9 @@ public class TutorialSideButton extends Button {
     public int scissorMinY;
     public int scissorMaxX;
     public int scissorMaxY;
-    public TutorialScrollBar scrollBar;
+    public int textColor;
 
-    public TutorialSideButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, OnPress pOnPress, CreateNarration pCreateNarration, TutorialPage page, TutorialScrollBar scrollBar, ResourceLocation texture, int xOffset, int yOffset, int textureWidth, int textureHeight, int iconXOffset, int iconYOffset, int iconWidth, int iconHeight, int dotXOffset, int dotYOffset, int dotWidth, int dotHeight, int scissorMinX, int scissorMinY, int scissorMaxX, int scissorMaxY) {
+    public TutorialSideButton(int pX, int pY, int pWidth, int pHeight, Component pMessage, OnPress pOnPress, CreateNarration pCreateNarration, TutorialPage page, TutorialScrollBar scrollBar, ResourceLocation texture, int xOffset, int yOffset, int textureWidth, int textureHeight, int iconXOffset, int iconYOffset, int iconWidth, int iconHeight, int dotXOffset, int dotYOffset, int dotWidth, int dotHeight, int scissorMinX, int scissorMinY, int scissorMaxX, int scissorMaxY, int textColor) {
         super(pX, pY, pWidth, pHeight, pMessage, pOnPress, pCreateNarration);
         this.originalY = this.getY();
         this.page = page;
@@ -51,6 +56,7 @@ public class TutorialSideButton extends Button {
         this.scissorMinY = scissorMinY;
         this.scissorMaxX = scissorMaxX;
         this.scissorMaxY = scissorMaxY;
+        this.textColor = textColor;
     }
 
     public static Builder builder() {
@@ -64,6 +70,26 @@ public class TutorialSideButton extends Button {
         return ((this.scrollBar.barY - this.scrollBar.minY) / this.scrollBar.canScrollRange) * this.scrollBar.hiddenRange;
     }
 
+    public void renderScrollingString(GuiGraphics pGuiGraphics, Component pText, int pMinX, int pMinY, int pMaxX, int pMaxY, int pColor) {
+        Font pFont = Minecraft.getInstance().font;
+        int i = pFont.width(pText);
+        int j = (pMinY + pMaxY - 9) / 2 + 1;
+        int k = pMaxX - pMinX;
+        if (i > k) {
+            int l = i - k;
+            double d0 = (double) Util.getMillis() / 1000.0D;
+            double d1 = Math.max((double) l * 0.5D, 3.0D);
+            double d2 = Math.sin((Math.PI / 2D) * Math.cos((Math.PI * 2D) * d0 / d1)) / 2.0D + 0.5D;
+            double d3 = Mth.lerp(d2, 0.0D, (double) l);
+            pGuiGraphics.enableScissor(pMinX, pMinY, pMaxX, pMaxY);
+            pGuiGraphics.drawString(pFont, pText, pMinX - (int) d3, j, pColor);
+            pGuiGraphics.disableScissor();
+        } else {
+            pGuiGraphics.drawCenteredString(pFont, pText, (pMinX + pMaxX) / 2, j, pColor);
+        }
+
+    }
+
     @Override
     public boolean clicked(double pMouseX, double pMouseY) {
         return super.clicked(pMouseX, pMouseY)
@@ -71,7 +97,7 @@ public class TutorialSideButton extends Button {
                 && this.scissorMinY < pMouseY && this.scissorMaxY > pMouseY;
     }
 
-    // render文字还没写
+    // render文字要改
     @Override
     public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.updateHovered(pMouseX, pMouseY);
@@ -89,6 +115,15 @@ public class TutorialSideButton extends Button {
                 this.height,
                 this.textureWidth,
                 this.textureHeight
+        );
+        this.renderScrollingString(
+                pGuiGraphics,
+                this.getMessage(),
+                this.getX() + 2,
+                this.getY(),
+                this.page.icon == null ? this.getX() + this.width - 2 : this.getX() + this.width - 2 - iconWidth,
+                this.getY() + this.height,
+                this.textColor
         );
         if (this.page.icon != null) {
             pGuiGraphics.blit(
@@ -170,7 +205,7 @@ public class TutorialSideButton extends Button {
         public int scissorMinY;
         public int scissorMaxX;
         public int scissorMaxY;
-
+        public int textColor = -1;
 
         public TutorialSideButton build() {
             return new TutorialSideButton(
@@ -199,7 +234,8 @@ public class TutorialSideButton extends Button {
                     this.scissorMinX,
                     this.scissorMinY,
                     this.scissorMaxX,
-                    this.scissorMaxY
+                    this.scissorMaxY,
+                    this.textColor
             );
         }
 
@@ -335,6 +371,11 @@ public class TutorialSideButton extends Button {
 
         public Builder setScissorMaxY(int scissorMaxY) {
             this.scissorMaxY = scissorMaxY;
+            return this;
+        }
+
+        public Builder setTextColor(int textColor) {
+            this.textColor = textColor;
             return this;
         }
     }

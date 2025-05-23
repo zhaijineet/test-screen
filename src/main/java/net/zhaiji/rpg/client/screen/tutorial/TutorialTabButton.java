@@ -46,7 +46,7 @@ public class TutorialTabButton extends Button {
 
     @Override
     public boolean clicked(double pMouseX, double pMouseY) {
-        if(this.isFocused()){
+        if(this.isHoveredOrFocused()){
             return this.active && this.visible && pMouseX >= (double)this.activeX && pMouseY >= (double)this.activeY && pMouseX < (double)(this.activeX + this.activeWidth) && pMouseY < (double)(activeY + this.activeHeight);
         }else {
             return this.active && this.visible && pMouseX >= (double)this.getX() && pMouseY >= (double)this.getY() && pMouseX < (double)(this.getX() + this.width) && pMouseY < (double)(this.getY() + this.height);
@@ -58,7 +58,7 @@ public class TutorialTabButton extends Button {
         pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
-        if (this.isFocused()) {
+        if (this.isHoveredOrFocused()) {
             pGuiGraphics.blit(
                     this.texture,
                     this.activeX,

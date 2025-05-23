@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.zhaiji.rpg.Rpg;
 import net.zhaiji.rpg.handle.PlayerMixinInterface;
@@ -29,6 +30,8 @@ public class TutorialScreen extends Screen {
     public ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Rpg.MODID, "textures/gui/tutorial.png");
     public int textureWidth = 512;
     public int textureHeight = 512;
+    public int titleX;
+    public int titleY;
     public Categories category = Categories.ALL;
     public List<TutorialPage> allPages = new ArrayList<>();
     public List<TutorialPage> categoryPages;
@@ -124,10 +127,10 @@ public class TutorialScreen extends Screen {
     }
 
     public enum Categories {
-        ALL(Component.translatable("all"), Items.APPLE),
-        TEST_1(Component.translatable("test_1"), Items.STONE),
-        TEST_2(Component.translatable("test_2"), Items.STICK),
-        TEST_3(Component.translatable("test_3"), Items.DIAMOND),;
+        ALL(Component.translatable("rpg.screen.title_1"), Items.APPLE),
+        TEST_1(Component.translatable("rpg.screen.title_2"), Items.STONE),
+        TEST_2(Component.translatable("rpg.screen.title_3"), Items.STICK),
+        TEST_3(Component.translatable("rpg.screen.title_4"), Items.DIAMOND),;
 
         public final Component title;
         public final Item icon;
@@ -138,8 +141,12 @@ public class TutorialScreen extends Screen {
         }
     }
 
+    public TutorialScreen() {
+        super(Component.translatable("rpg.screen.title"));
+    }
+
     @Override
-    protected void init() {
+    public void init() {
         super.init();
 
         this.leftPos = (this.width - this.screenWidth) / 2;
@@ -153,6 +160,9 @@ public class TutorialScreen extends Screen {
                 .setHeight(this.screenHeight)
                 .setX(this.leftPos)
                 .setY(this.topPos);
+
+        this.titleX = this.leftPos + 56;
+        this.titleY = this.topPos + 17;
 
         this.initPages();
         this.loadCategoryPages();
@@ -215,11 +225,11 @@ public class TutorialScreen extends Screen {
                         .setHeight(this.claimButtonHeight)
                         .setXOffset(this.claimButtonXOffset)
                         .setYOffset(this.claimButtonYOffset)
-                        .setMessage(Component.translatable("claim_button"))
+                        .setMessage(Component.translatable("rpg.button.claim"))
                         .setOnPress(pButton -> {
-                            // 发包
                             this.updatePageState(2);
                             RpgPacket.sendToServer(new AwardServerPacket(this.selectPage.identifier));
+                            this.selectPage.pageNumber--;
                             this.updateButton();
                         })
                         .setTextureWidth(this.textureWidth)
@@ -288,11 +298,7 @@ public class TutorialScreen extends Screen {
                                                 this.category = button.category;
                                             }
                                             this.tabs.forEach(tab -> {
-                                                if (tab == button) {
-                                                    tab.setFocused(!tab.isFocused());
-                                                } else {
-                                                    tab.setFocused(false);
-                                                }
+                                                tab.setFocused(tab == button);
                                             });
                                             this.loadCategoryPages();
                                             this.pages.clear();
@@ -478,6 +484,18 @@ public class TutorialScreen extends Screen {
             int startX = x - totalWidth / 2;
             for (int i = 0; i < this.selectPage.award.size(); i++) {
                 int renderX = startX + i * (this.slotIconWidth + this.slotIconSpacing);
+                ItemStack itemStack = this.selectPage.award.get(i);
+                if (pMouseX > renderX
+                        && pMouseX < renderX + this.slotIconWidth
+                        && pMouseY > y
+                        && pMouseY < y + this.slotIconHeight) {
+                    pGuiGraphics.renderTooltip(
+                            this.font,
+                            itemStack,
+                            pMouseX,
+                            pMouseY
+                    );
+                }
                 pGuiGraphics.blit(
                         this.TEXTURE,
                         renderX,
@@ -490,7 +508,13 @@ public class TutorialScreen extends Screen {
                         this.textureHeight
                 );
                 pGuiGraphics.renderItem(
-                        this.selectPage.award.get(i),
+                        itemStack,
+                        renderX + 1,
+                        y + 1
+                );
+                pGuiGraphics.renderItemDecorations(
+                        this.font,
+                        itemStack,
                         renderX + 1,
                         y + 1
                 );
@@ -523,6 +547,19 @@ public class TutorialScreen extends Screen {
         this.renderBackground(pGuiGraphics);
 
         this.TUTORIAL_SCREEN.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
+
+        // 得改的地方
+        float scale = 1.5f;
+        pGuiGraphics.pose().pushPose();
+        pGuiGraphics.pose().scale(scale, scale, 1.0f);
+        pGuiGraphics.drawCenteredString(
+                this.font,
+                Component.translatable("rpg.screen.title_0", this.title, this.category.title),
+                (int) (this.titleX / scale),
+                (int) (this.titleY / scale),
+                -1
+        );
+        pGuiGraphics.pose().popPose();
 
         if (this.selectPage != null) {
             this.selectPage.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);

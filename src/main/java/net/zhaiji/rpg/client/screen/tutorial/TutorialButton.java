@@ -1,11 +1,13 @@
 package net.zhaiji.rpg.client.screen.tutorial;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 public class TutorialButton extends Button {
     public ResourceLocation texture;
@@ -29,7 +31,7 @@ public class TutorialButton extends Button {
 
     // 没写文字渲染
     @Override
-    protected void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         pGuiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
@@ -44,6 +46,8 @@ public class TutorialButton extends Button {
                 this.textureWidth,
                 this.textureHeight
         );
+        //得改
+        this.renderString(pGuiGraphics, Minecraft.getInstance().font, this.getFGColor() | Mth.ceil(this.alpha * 255.0F) << 24);
     }
 
     public static class Builder {

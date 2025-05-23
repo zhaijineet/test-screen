@@ -20,6 +20,7 @@ public class TutorialTip {
     public int x = 0;
     public int y = 0;
 
+    // 得改
     public TutorialTip(List<Component> components) {
         this.components = components;
     }
@@ -59,7 +60,7 @@ public class TutorialTip {
     public int drawWordWrap(GuiGraphics pGuiGraphics, Font pFont, FormattedText pText, int pX, int pY, int pLineWidth, int pColor) {
         int line = 0;
         for (FormattedCharSequence formattedcharsequence : pFont.split(pText, pLineWidth)) {
-            pGuiGraphics.drawString(pFont, formattedcharsequence, pX, pY, pColor, false);
+            pGuiGraphics.drawString(pFont, formattedcharsequence, pX, pY, pColor, true);
             pY += 9;
             line += 1;
         }
@@ -69,7 +70,7 @@ public class TutorialTip {
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         int line = 0;
         for (Component component : this.components) {
-            line += this.drawWordWrap(pGuiGraphics, Minecraft.getInstance().font, component, this.x, this.y + line * 9, maxLineWidth, color);
+            line += this.drawWordWrap(pGuiGraphics, Minecraft.getInstance().font, component, this.x, this.y + line * 9, this.maxLineWidth, this.color);
         }
     }
 }

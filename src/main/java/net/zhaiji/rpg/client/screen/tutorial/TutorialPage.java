@@ -111,6 +111,7 @@ public class TutorialPage {
     }
 
     public void init(int x, int y) {
+        // 得改
         this.x = x;
         this.y = y;
         textures.forEach(texture-> texture.setX(x).setY(y));
@@ -128,7 +129,7 @@ public class TutorialPage {
 
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         this.getTexture(this.pageNumber).render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        if (this.award.isEmpty() || this.pageNumber < this.maxPageNumber - 1) {
+        if (this.award.isEmpty() || this.pageNumber < (this.state == 2 ? this.maxPageNumber : this.maxPageNumber - 1)) {
             this.getTip(this.pageNumber).render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         }
     }
