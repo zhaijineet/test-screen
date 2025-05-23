@@ -7,5 +7,8 @@
   "rpg.screen.title_4": "分类3",
   "rpg.button.claim": "领取",
   "rpg.tips.crafting_table": "工作台",
-  "rpg.tips.crafting_table_1": "工作台制作"
+  "rpg.tips.crafting_table_1": "工作台制作",
+  "rpg.tips.furnace": "熔炉",
+  "rpg.tips.furnace_1": "熔炉可以烧制矿物",
+  "rpg.tips.furnace_2": "熔炉可以烹饪食物"
 }

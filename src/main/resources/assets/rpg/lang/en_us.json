@@ -7,5 +7,8 @@
   "rpg.screen.title_4": "Category 3",
   "rpg.button.claim": "Claim",
   "rpg.tips.crafting_table": "Crafting Table",
-  "rpg.tips.crafting_table_1": "Crafting Table Create"
+  "rpg.tips.crafting_table_1": "Crafting Table Create",
+  "rpg.tips.furnace": "Furnace",
+  "rpg.tips.furnace_1": "Furnace 1",
+  "rpg.tips.furnace_2": "Furnace 2"
 }

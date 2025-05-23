@@ -33,14 +33,41 @@ public class InitTutorial {
             )
     );
 
+    public static TutorialTip tip_furnace_1 = new TutorialTip(
+            new ArrayList<>(
+                    List.of(
+                            Component.translatable("rpg.tips.furnace_1")
+                    )
+            )
+    );
+
+    public static TutorialTip tip_furnace_2 = new TutorialTip(
+            new ArrayList<>(
+                    List.of(
+                            Component.translatable("rpg.tips.furnace_2")
+                    )
+            )
+    );
+
     public static TutorialPage CRAFTING_TABLE = ADD(
             TutorialPage.create()
-                    .setIdentifier("test_1_1")
+                    .setIdentifier("crafting_table")
                     .setTitle(Component.translatable("rpg.tips.crafting_table"))
                     .addCategory(TutorialScreen.Categories.TEST_1)
                     .setIcon(Items.CRAFTING_TABLE)
                     .addPage(texture, tip_crafting_table)
                     .addAward(texture, new ItemStack(Items.OAK_LOG, 16))
+    );
+
+    public static TutorialPage FURNACE = ADD(
+            TutorialPage.create()
+                    .setIdentifier("furnace")
+                    .setTitle(Component.translatable("rpg.tips.furnace"))
+                    .addCategory(TutorialScreen.Categories.TEST_2)
+                    .setIcon(Items.FURNACE)
+                    .addPage(texture, tip_furnace_1)
+                    .addPage(texture, tip_furnace_2)
+                    .addAward(texture, new ItemStack(Items.COAL, 16), new ItemStack(Items.PORKCHOP, 8))
     );
 
 //    public static TutorialTip tip_1 = new TutorialTip(

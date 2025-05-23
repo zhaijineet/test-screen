@@ -11,6 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.zhaiji.rpg.Rpg;
 import net.zhaiji.rpg.handle.PlayerMixinInterface;
 import net.zhaiji.rpg.network.RpgPacket;
@@ -21,15 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@OnlyIn(Dist.CLIENT)
 public class TutorialScreen extends Screen {
+    public static ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Rpg.MODID, "textures/gui/tutorial.png");
+    public static int textureWidth = 512;
+    public static int textureHeight = 512;
     public int leftPos;
     public int topPos;
     public TutorialTexture TUTORIAL_SCREEN = TutorialTexture.create();
     public int screenWidth = 256;
     public int screenHeight = 253;
-    public ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Rpg.MODID, "textures/gui/tutorial.png");
-    public int textureWidth = 512;
-    public int textureHeight = 512;
     public int titleX;
     public int titleY;
     public Categories category = Categories.ALL;
@@ -126,6 +129,10 @@ public class TutorialScreen extends Screen {
         super(pTitle);
     }
 
+    public TutorialScreen() {
+        super(Component.translatable("rpg.screen.title"));
+    }
+
     public enum Categories {
         ALL(Component.translatable("rpg.screen.title_1"), Items.APPLE),
         TEST_1(Component.translatable("rpg.screen.title_2"), Items.STONE),
@@ -139,10 +146,6 @@ public class TutorialScreen extends Screen {
             this.title = title;
             this.icon = icon;
         }
-    }
-
-    public TutorialScreen() {
-        super(Component.translatable("rpg.screen.title"));
     }
 
     @Override

@@ -2,7 +2,10 @@ package net.zhaiji.rpg.client.screen.tutorial;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class TutorialScrollBar {
     public ResourceLocation texture;
 
