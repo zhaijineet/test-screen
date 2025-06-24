@@ -431,7 +431,9 @@ public class TutorialScreen extends Screen {
         PlayerMixinInterface playerMixinInterface = ((PlayerMixinInterface) Minecraft.getInstance().player);
         this.allPages.clear();
         for (TutorialPage page : InitTutorial.PAGES) {
-            this.allPages.add(page.copy());
+            if (playerMixinInterface.getTutorialPages().getInt(page.identifier) != -1) {
+                this.allPages.add(page.copy());
+            }
         }
         System.out.println(playerMixinInterface.getTutorialPages());
         this.allPages.forEach(page -> {

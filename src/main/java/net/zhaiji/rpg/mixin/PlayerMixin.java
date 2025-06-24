@@ -25,7 +25,7 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerMixinInt
     @Inject(method = "<init>", at = @At("RETURN"))
     public void rpg$init(Level pLevel, BlockPos pPos, float pYRot, GameProfile pGameProfile, CallbackInfo ci) {
         CompoundTag compoundTag = new CompoundTag();
-        InitTutorial.PAGES.forEach(page -> compoundTag.putInt(page.identifier, 0));
+        InitTutorial.PAGES.forEach(page -> compoundTag.putInt(page.identifier, -1));
         this.tutorialPages = compoundTag;
     }
 
